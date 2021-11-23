@@ -5,8 +5,8 @@
 *    - docker-hub
 *    - aws-eb-key
 * 3. AWS Elastic Benstalk in us-east-1 region
-*    - Application: jrcms
-*    - Environment: jrcms-test, jrcms-staging and jrcms-production
+*    - Application: jrcmsolivia
+*    - Environment: jrcmsolivia-test, jrcmsolivia-staging and jrcmsolivia-production
 **/
 
 podTemplate(
@@ -19,7 +19,7 @@ podTemplate(
       
     def image
     withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'USER', passwordVariable: 'PASSWD')]) {
-        image = "${USER}/jrcms:${currentBuild.number}"
+        image = "${USER}/jrcmsolivia:${currentBuild.number}"
     }
     
     stage('Build and Test') {
@@ -69,13 +69,12 @@ def smokeTest(environment) {
 }
 
 def deployToEB(environment) {
-    checkout scm
     withCredentials([usernamePassword(credentialsId: 'aws-eb-key', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             container('eb') {
                 withEnv(["AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}", "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}", "AWS_REGION=us-east-1"]) {
                     dir("deployment") {
                     sh "sh generate-dockerrun.sh ${currentBuild.number}"
-                    sh "eb deploy jrcms-${environment} -l ${currentBuild.number}"
+                    sh "eb deploy jrcmsolivia-${environment} -l ${currentBuild.number}"
                     }
                 }
             }
